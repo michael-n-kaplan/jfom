@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/JFOM/src"
+    modelPluginID="JFOM" modelName="jfom" importerID="org.eclipse.emf.importer.ecore"
+    complianceLevel="6.0" copyrightFields="false">
+  <foreignModel>jfom.ecore</foreignModel>
+  <genPackages prefix="JFOM" basePackage="org" disposableProviderFactory="true" ecorePackage="jfom.ecore#/">
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="jfom.ecore#//AccessSpec">
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//AccessSpec/public"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//AccessSpec/private"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="jfom.ecore#//IntentSpec">
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntentSpec/in"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntentSpec/out"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntentSpec/inout"/>
+    </genEnums>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="jfom.ecore#//IntrinsicType">
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/integer"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/real"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/doublePrecision"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/complex"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/character"/>
+      <genEnumLiterals ecoreEnumLiteral="jfom.ecore#//IntrinsicType/logical"/>
+    </genEnums>
+    <genClasses ecoreClass="jfom.ecore#//AccessStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//AccessStatement/accessSpec"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//AccessStatement/accessIdentifier"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//ActionStatement"/>
+    <genClasses ecoreClass="jfom.ecore#//ActualArgumentSpec">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//ActualArgumentSpec/keyword"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ActualArgumentSpec/argument"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ArbitraryTextConstruct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//ArbitraryTextConstruct/text"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ArrayConstructor">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ArrayConstructor/arrayConstructorValue"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//ArrayConstructorValue"/>
+    <genClasses ecoreClass="jfom.ecore#//AssignmentStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//AssignmentStatement/variable"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//AssignmentStatement/expression"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//AttrSpec"/>
+    <genClasses ecoreClass="jfom.ecore#//CallStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//CallStatement/subroutineName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//CallStatement/actualArgument"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//Constant"/>
+    <genClasses ecoreClass="jfom.ecore#//ContainsStatement"/>
+    <genClasses ecoreClass="jfom.ecore#//DeclarationConstruct"/>
+    <genClasses ecoreClass="jfom.ecore#//DerivedTypeSpec">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//DerivedTypeSpec/type"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//DoConstruct">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//DoConstruct/doVariable"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//DoConstruct/start"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//DoConstruct/end"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//DoConstruct/executionPartConstruct"/>
+      <genOperations ecoreOperation="jfom.ecore#//DoConstruct/setStart">
+        <genParameters ecoreParameter="jfom.ecore#//DoConstruct/setStart/start"/>
+      </genOperations>
+      <genOperations ecoreOperation="jfom.ecore#//DoConstruct/setEnd">
+        <genParameters ecoreParameter="jfom.ecore#//DoConstruct/setEnd/end"/>
+      </genOperations>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//EndModuleStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//EndModuleStatement/moduleName"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//EndProgramStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//EndProgramStatement/programName"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//EndSubroutineStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//EndSubroutineStatement/subroutineName"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//EStringTemplate"/>
+    <genClasses image="false" ecoreClass="jfom.ecore#//ExecutableConstruct"/>
+    <genClasses ecoreClass="jfom.ecore#//ExecutionPart">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ExecutionPart/executionPartConstruct"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ExecutionPartConstruct"/>
+    <genClasses image="false" ecoreClass="jfom.ecore#//Expression"/>
+    <genClasses ecoreClass="jfom.ecore#//FunctionReference">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//FunctionReference/functionName"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//FunctionReference/actualArgument"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//FunctionSubprogram"/>
+    <genClasses ecoreClass="jfom.ecore#//IfStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//IfStatement/test"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//IfStatement/action"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ImplicitPart">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ImplicitPart/implicitPartStatement"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ImplicitPartStatement"/>
+    <genClasses ecoreClass="jfom.ecore#//ImplicitStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//ImplicitStatement/implicitSpecList"/>
+      <genOperations ecoreOperation="jfom.ecore#//ImplicitStatement/isNone"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//IntentAttrSpec">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//IntentAttrSpec/intentSpec"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//InternalSubprogramPart"/>
+    <genClasses ecoreClass="jfom.ecore#//IntrinsicTypeSpec">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//IntrinsicTypeSpec/type"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//LiteralConstant">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//LiteralConstant/literal"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//MainProgram">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//MainProgram/programStatement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//MainProgram/specificationPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//MainProgram/executionPart"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference jfom.ecore#//MainProgram/internalSubprogramPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//MainProgram/endProgramStatement"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//Module">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//Module/moduleStatement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//Module/specificationPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//Module/moduleSubprogramPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//Module/endModuleStatement"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//ModuleStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//ModuleStatement/moduleName"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//ModuleSubprogram"/>
+    <genClasses ecoreClass="jfom.ecore#//ModuleSubprogramPart">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ModuleSubprogramPart/containsStatement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//ModuleSubprogramPart/moduleSubprogram"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//NamedConstant">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//NamedConstant/name"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//PrintStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//PrintStatement/format"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//PrintStatement/outputItem"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//ProgramUnit"/>
+    <genClasses ecoreClass="jfom.ecore#//ProgramStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//ProgramStatement/programName"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//SaveAttrSpec"/>
+    <genClasses ecoreClass="jfom.ecore#//SpecificationPart">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SpecificationPart/useStatement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SpecificationPart/implicitPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SpecificationPart/declarationConstruct"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//SpecificationStatement"/>
+    <genClasses image="false" ecoreClass="jfom.ecore#//StringTemplateAdapter">
+      <genFeatures property="None" children="true" createChild="false" ecoreFeature="ecore:EReference jfom.ecore#//StringTemplateAdapter/stringTemplate"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//SubroutineStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//SubroutineStatement/subroutineName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//SubroutineStatement/formalArgument"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//SubroutineSubprogram">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SubroutineSubprogram/subroutineStatement"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SubroutineSubprogram/specificationPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SubroutineSubprogram/executionPart"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference jfom.ecore#//SubroutineSubprogram/internalSubprogramPart"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//SubroutineSubprogram/endSubroutineStatement"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//TypeDeclarationStatement">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//TypeDeclarationStatement/typeSpec"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference jfom.ecore#//TypeDeclarationStatement/attrSpec"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//TypeDeclarationStatement/entityDeclaration"/>
+    </genClasses>
+    <genClasses image="false" ecoreClass="jfom.ecore#//TypeSpec"/>
+    <genClasses ecoreClass="jfom.ecore#//UseStatement">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//UseStatement/moduleName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute jfom.ecore#//UseStatement/renameList"/>
+    </genClasses>
+    <genClasses ecoreClass="jfom.ecore#//_Spacer"/>
+  </genPackages>
+</genmodel:GenModel>

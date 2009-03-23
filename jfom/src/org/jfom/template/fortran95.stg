@@ -1,0 +1,183 @@
+group fortran95;
+
+AccessStatement(accessSpec, accessIdentifier) ::= <<
+<accessSpec> <accessIdentifier; separator=", ">
+>>
+
+ActualArgumentSpec(keyword, argument) ::= <<
+<if(keyword)><keyword>=<endif><argument>
+>>
+
+ArrayConstructor(arrayConstructorValue) ::= <<
+(/<arrayConstructorValue; separator=", ">/)
+>>
+
+
+AssignmentStatement(variable, expression) ::= <<
+<variable> = <expression; wrap="&\n  ", anchor>
+>>
+
+
+CallStatement(subroutineName, actualArgument) ::= <<
+call <subroutineName>(<actualArgument; wrap="&\n  ", anchor, separator=", ">)
+>>
+
+ContainsStatement() ::= <<
+contains
+>>
+
+DerivedTypeSpec(type) ::= <<
+type(<type>)
+>>
+
+
+DoConstruct(doVariable, start, end, executionPartConstruct) ::= <<
+DO CONSTRUCT
+>>
+
+
+EndModuleStatement(moduleName) ::= <<
+end module <moduleName>
+>>
+
+EndProgramStatement(programName) ::= <<
+end program <programName>
+>>
+
+
+EndSubroutineStatement(subroutineName) ::= <<
+end subroutine <subroutineName>
+>>
+
+
+ExecutionPart(executionPartConstruct) ::= <<
+<executionPartConstruct; wrap="&\n  ", anchor, separator="\n">
+>>
+
+
+FunctionReference(functionName, actualArgument) ::= <<
+<functionName>(<actualArgument; wrap="&\n  ", anchor, separator=", ">)
+>>
+
+
+IfStatement(test, action) ::= <<
+if (<test>) <action; wrap="&\n  ">
+>>
+
+ImplicitPart(implicitPartStatement) ::= <<
+<implicitPartStatement; separator="\n">
+>>
+
+ImplicitStatement(implicitSpecList) ::= <<
+<if(!implicitSpecList)>
+implicit none
+<else>
+FINISH IMPLICIT TEMPLATE HERE
+<endif>
+>>
+
+
+IntentAttrSpec(intentSpec) ::= <<
+intent(<intentSpec>)
+>>
+
+
+IntrinsicTypeSpec(type) ::= <<
+<type>
+>>
+
+LiteralConstant(literal) ::= <<
+<literal>
+>>
+
+MainProgram(programStatement, specificationPart, executionPart, internalSubprogramPart, endProgramStatement) ::= <<
+<programStatement>
+
+  <specificationPart; wrap>
+  
+  <executionPart; wrap>
+  
+  <internalSubprogramPart; wrap>
+  
+<endProgramStatement>
+>>
+
+Module(moduleStatement, specificationPart, moduleSubprogramPart, endModuleStatement) ::= <<
+<moduleStatement>
+  <specificationPart>
+  
+  <moduleSubprogramPart>
+  
+<endModuleStatement>
+>>
+
+ModuleStatement(moduleName) ::= <<
+module <moduleName>
+>>
+
+ModuleSubprogramPart(containsStatement, moduleSubprogram) ::= <<
+<containsStatement>
+<moduleSubprogram; separator="\n\n">
+>>
+
+NamedConstant(name) ::= <<
+<name>
+>>
+
+PrintStatement(format, outputItem) ::= <<
+print <format><if(outputItem)>, <outputItem; wrap="&\n  ", anchor, separator=", "><endif>
+>>
+
+ProgramStatement(programName) ::= <<
+program <programName>
+>>
+
+
+SaveAttrSpec() ::=<<
+save
+>>
+
+SpecificationPart(declarationConstruct, useStatement, implicitPart) ::= <<
+<useStatement; separator="\n">
+
+<implicitPart>
+
+<declarationConstruct; separator="\n">
+>>
+
+
+SubroutineStatement(subroutineName, formalArgument) ::= <<
+subroutine <subroutineName>(<formalArgument; separator=", ">)
+>>
+
+
+SubroutineSubprogram(subroutineStatement, specificationPart, executionPart, internalSubprogramPart, endSubroutineStatement) ::= <<
+<subroutineStatement>
+  <specificationPart>
+  
+  <executionPart>
+  
+  <internalSubprogramPart>
+  
+<endSubroutineStatement>
+>>
+
+
+
+TypeDeclarationStatement(typeSpec, attrSpec, entityDeclaration) ::= <<
+<typeSpec><if(attrSpec)>, <attrSpec><endif> :: <entityDeclaration; wrap="&\n  ", anchor, separator=", ">
+>>
+
+
+UseStatement(moduleName, renameList) ::= <<
+<if(renameList)>
+use <moduleName>, only : <renameList.keys:{k|<renameList.(k)> => <k>}; wrap="&\n  ", anchor, separator=", ">
+<else>
+use <moduleName>
+<endif>
+>>
+
+
+_Spacer() ::=<<
+
+>>
