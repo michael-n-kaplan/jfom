@@ -12,7 +12,6 @@ ArrayConstructor(arrayConstructorValue) ::= <<
 (/<arrayConstructorValue; separator=", ">/)
 >>
 
-
 AssignmentStatement(variable, expression) ::= <<
 <variable> = <expression; wrap="&\n  ", anchor>
 >>
