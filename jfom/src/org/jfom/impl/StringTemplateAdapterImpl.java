@@ -20,7 +20,6 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 import org.jfom.JFOMPackage;
-import org.jfom.JFOMPackage;
 import org.jfom.StringTemplateAdapter;
 
 /**
