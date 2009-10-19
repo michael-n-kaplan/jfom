@@ -175,10 +175,10 @@ public abstract class StringTemplateAdapterImpl extends EObjectImpl implements S
 				//System.out.println("setting feature: " + esf.getName());								
 				//set the attribute in the string template
 				//StringTemplate handles lists (EList) appropriately here
-				st.setAttribute(esf.getName(), this.eGet(esf));
+				//System.out.println("Attribute: " + esf.getName() + "->" + this.eGet(esf));
+				st.setAttribute(esf.getName(), this.eGet(esf));				
 			}
-		}
-						
+		}		
 		return st;
 	}
 

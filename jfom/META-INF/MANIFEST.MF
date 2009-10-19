@@ -3,9 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: JFOM;singleton:=true
 Bundle-Version: 1.0.0
-Bundle-ClassPath: .,
- lib/antlr-2.7.7.jar,
- lib/stringtemplate.jar
+Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -13,5 +11,6 @@ Export-Package: org.jfom,
  org.jfom.impl,
  org.jfom.util
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.emf.ecore;visibility:=reexport
+ org.eclipse.emf.ecore;visibility:=reexport,
+ org.antlr.gen;bundle-version="3.0.1"
 Bundle-ActivationPolicy: lazy
