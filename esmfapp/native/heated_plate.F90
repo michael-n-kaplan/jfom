@@ -1,52 +1,32 @@
 module heated_plate
 
-  ! ESMF Framework module
-  use ESMF_Mod
-
   implicit none
     
-  public userm1_setvm, userm1_register
+  public init, run, finish
   
   real :: deltax, deltat, tfinal, xfinal
   integer :: timeStep, tmax, xmax, outfreq
   real :: initbottom, inittop, initleft, initright, initinterior
   real :: alpha, Fo
+
+  ! data array
+  real, pointer :: farray(:,:)
+
+  ! previous timestep
+  real, pointer :: farrayOld(:,:)
+
+  parameter (deltax=.04, deltat=.001, xfinal=.5, tfinal=3.0)
+  parameter (initbottom=100.0, inittop=100.0, initleft=100.0, initright=100.0, initinterior=20.0)
+  parameter (alpha=.01)
+  parameter (outfreq=100)
     
   contains
 
-
-  subroutine user_init()
-
-    !integer, intent(out) :: rc
+  subroutine init()
 
     ! Local variables
-    type(ESMF_Config)     :: config
     character(len=5) :: fileno
-    
-    real, pointer :: farrayPtr(:,:)
-    real, pointer :: farrayAll(:,:)
-    real, pointer :: farrayLoc(:,:)
-    integer, dimension(2,1) :: elb, eub, clb, cub
     integer :: i, j
-
-
-    ! load parameters from configuration file
-    ! MOVE THESE TO PARAMETER STATEMENTS
-	call ESMF_Initialize()
-    config = ESMF_ConfigCreate(rc)
-    call ESMF_ConfigLoadFile(config, "/home/rocky/esmf4/esmf/application/params.rc", rc=rc)
-    call ESMF_ConfigGetAttribute(config, deltax, label="deltax:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, deltat, label="deltat:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, xfinal, label="xfinal:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, tfinal, label="tfinal:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, initbottom, label="initbottom:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, inittop, label="inittop:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, initleft, label="initleft:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, initright, label="initright:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, initinterior, label="initinterior:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, alpha, label="alpha:", rc=rc)
-    call ESMF_ConfigGetAttribute(config, outfreq, label="outfreq:", rc=rc)
-
 
     ! initialize time
     timeStep = 1
@@ -59,72 +39,30 @@ module heated_plate
 		return
     endif
     
-    ! Create the source Array and add it to the export State
-   ! call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+   ! allocate space
+   allocate(farray(1:xmax, 1:xmax))
+   allocate(farrayOld(1:xmax, 1:xmax))
 
-  !  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/xmax,xmax/), &
-  !    regDecomp=(/1,1/), rc=rc)
+	! type(ESMF_DistGrid)   :: distgrid
+	!  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/xmax,xmax/), regDecomp=(/1,1/), rc=rc)
 
-    !array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, indexflag=ESMF_INDEX_GLOBAL, rc=rc)
-
-   allocate(farrayLoc(1:xmax,1:xmax))
-
-   ! create the initial array locally
+   ! set up initial and boundary conditions
    do i=1,xmax
       do j=1,xmax
          if (j==1) then
-            farrayLoc(i,j) = initbottom
+            farray(i,j) = initbottom
          else if (j==xmax) then
-            farrayLoc(i,j) = inittop
+            farray(i,j) = inittop
          else if (i==1) then
-            farrayLoc(i,j) = initleft
+            farray(i,j) = initleft
          else if (i==xmax) then
-            farrayLoc(i,j) = initright
+            farray(i,j) = initright
          else
-            farrayLoc(i,j) = initinterior
+            farray(i,j) = initinterior
          endif
       enddo
    enddo
 
-    
-
-    if (localPet==0) then
-       deallocate(farrayLoc)
-    endif
-
-    ! initialize array
-
-  !  call ESMF_ArrayGet(array, localDe=0, farrayPtr=farrayPtr, rc=rc)
-  !  if (rc/=ESMF_SUCCESS) return ! bail out
-
- !   call ESMF_ArrayGet(array, exclusiveLBound=elb, exclusiveUBound=eub, & 
- !        computationalLBound=clb, computationalUBound=cub, rc=rc)
- !   if (rc/=ESMF_SUCCESS) return ! bail out
-   
-    ! initial conditions and boundary conditions
- !   do i = elb(1,1), eub(1,1)
- !      do j = elb(2,1), eub(2,1)
- !         if (j==1) then
- !            farrayPtr(i,j) = initbottom          
- !         else if (j==xmax) then
- !            farrayPtr(i,j) = inittop         
- !         else if (i==1) then
- !            farrayPtr(i,j) = initleft
- !         else if (i==xmax) then
- !            farrayPtr(i,j) = initright
- !         else
- !            farrayPtr(i,j) = initinterior          
- !         endif
- !      enddo
- !   enddo
-
-    ! gather and output initial conditions
- !   if (localPet==0) then
- !      allocate(farrayAll(xmax,xmax))
- !   endif
-    
- !   call ESMF_ArrayGather(array, farray=farrayAll, rootPet=0, rc=rc)
-    
     ! output data to file
  !   if (localPet==0) then
  !      write(fileno,61) 1
@@ -135,58 +73,42 @@ module heated_plate
  !      close(11)
  !      deallocate(farrayAll)
  !   endif
-    
-
 
 60  format(10000F10.5)
 61  format(I5.5)   
 
 
-  end subroutine user_init
+  end subroutine init
 
 
  
-  subroutine user_run()
+  subroutine run()
 
     ! Local variables
-    real    :: pi
-    real, pointer :: farrayPtr(:,:)
-    real, pointer :: farrayOld(:,:)
-    real, pointer :: farrayAll(:,:)
     integer               :: i, j
-    integer               :: localPet
     character(len=5) :: fileno
     
-    integer, dimension(2,1) :: elb, eub, clb, cub
+    do while (timeStep <= tmax)
 
-    ! increment time
-    timeStep = timeStep + 1
+    	! increment time
+    	timeStep = timeStep + 1
   
-    ! print *, "Comp1 - run (", timeStep, ")"
-   
+    	! print *, "Comp1 - run (", timeStep, ")"
 
-    ! make a copy of the old one so we don't lose it
-    allocate(farrayOld(clb(1,1):cub(1,1), clb(2,1):cub(2,1)))
-    do i = clb(1,1), cub(1,1)
-       do j = clb(2,1), cub(2,1)
-          farrayOld(i,j)=farrayPtr(i,j)
-          if (farrayOld(i,j) < .05) then
-             farrayOld(i,j) = initinterior
-          endif
-       enddo
-    enddo
-    
-    do i = elb(1,1), eub(1,1)
-       do j = elb(2,1), eub(2,1)
-          
-          ! do not alter the boudary conditions
-          if (.NOT.(i==1 .OR. i==xmax .OR. j==1 .OR. j==xmax)) then                                 
-             farrayPtr(i,j) = &
-               Fo * (farrayOld(i+1,j) + &
-                     farrayOld(i-1,j) + &
-                     farrayOld(i,j+1) + &
-                     farrayOld(i,j-1)) + &
-               (1.0-4.0*Fo)*farrayOld(i,j)
+    	! make a copy of the old one so we don't lose it
+	    farrayOld(:,:) = farray(:,:)
+
+	    do i = 1, xmax
+	       do j = 1, xmax
+
+	          ! do not alter the boudary conditions
+	          if (.NOT.(i==1 .OR. i==xmax .OR. j==1 .OR. j==xmax)) then
+	             farray(i,j) = &
+	               Fo * (farrayOld(i+1,j) + &
+	                     farrayOld(i-1,j) + &
+	                     farrayOld(i,j+1) + &
+	                     farrayOld(i,j-1)) + &
+	               (1.0-4.0*Fo)*farrayOld(i,j)
 
 !             if (localPet==10 .AND. (timeStep==2 .OR. timeStep==3) .AND. i > 7 .AND. j > 5) then
 !                print *, "timeStep=", timeStep," i=", i, " j=", j
@@ -208,39 +130,32 @@ module heated_plate
 !                return
 !             end if
 
-          endif
-       enddo
-    enddo
+	          endif
+	       enddo
+	    enddo
 
-    deallocate(farrayOld)
+	    if (mod(timeStep,outfreq) == 0) then
+	   		write(fileno,61) timeStep
+	        open(11, file="/home/rocky/eclipse/runtime-New_configuration/esmfapp/native/data"//fileno//".dat", status="new")
+	        do i=1,xmax
+	        	write(11,60) (farray(i,j),j=1,xmax)
+	        enddo
+	        close(11)
+	    endif
 
-    
-    if (mod(timeStep,outfreq) == 0) then
-       ! gather all data on PET 0
-     !  if (localPet==0) then
-     !     allocate(farrayAll(xmax,xmax))
-     !  endif
-       
-     !  call ESMF_ArrayGather(array, farray=farrayAll, rootPet=0, rc=rc)
-       
-       ! output data to file
-       if (localPet==0) then
-          write(fileno,61) timeStep
-          open(11, file="/home/rocky/esmf4/esmf/application/data_"//fileno//".dat", status="new")
-          do i=1,xmax
-             write(11,60) (farrayAll(i,j),j=1,xmax)
-          enddo
-          close(11)
-          deallocate(farrayAll)
-       endif
-    endif
+	end do
 
  !   print *, "comp1 run returning"
 
 60  format(10000F10.5)
 61  format(I5.5)          
 
-  end subroutine user_run
+  end subroutine run
+
+  subroutine finish()
+  	deallocate(farray)
+  	deallocate(farrayOld)
+  end subroutine finish
 
 
 end module heated_plate

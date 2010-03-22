@@ -29,12 +29,12 @@ include /home/rocky/eclipse/runtime-New_configuration/esmf/lib/libO/Linux.intel.
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILEFREECPP) $(ESMF_F90COMPILECPPFLAGS) $<
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $*.o $(ESMF_F90ESMFLINKLIBS)        
 
-OBJS = heated_plate.o heat_sinks.o coupler.o driver.o
+OBJS = heated_plate.o driver.o
 
 # -----------------------------------------------------------------------------
 all: esmf_application
 
-esmf_application: heated_plate.o heat_sinks.o coupler.o
+esmf_application: heated_plate.o
 	$(ESMF_F90COMPILER) -c $(ESMF_F90COMPILEOPTS) $(ESMF_F90COMPILEPATHS) $(ESMF_F90COMPILECPPFLAGS) driver.F90
 	$(ESMF_F90LINKER) $(ESMF_F90LINKOPTS) $(ESMF_F90LINKPATHS) $(ESMF_F90LINKRPATHS) -o $@ $(OBJS) $(ESMF_F90ESMFLINKLIBS)
 
