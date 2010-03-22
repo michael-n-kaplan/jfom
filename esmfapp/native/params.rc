@@ -1,0 +1,14 @@
+# parameters for heat diffusion model
+deltax:      0.04
+deltat:      0.001
+xfinal:	     1.5
+tfinal:	     3
+alpha:	     0.01
+
+initbottom:  100.0
+inittop:     100.0
+initleft:    100.0
+initright:   100.0
+initinterior:	20.0
+
+outfreq:	100
