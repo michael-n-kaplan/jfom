@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Token Changer Plug-in
+Bundle-SymbolicName: edu.uiuc.nchen.tokenchanger;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Vendor: Nicholas Chen
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.photran.ui.vpg,
+ org.eclipse.photran.core.vpg,
+ org.eclipse.ltk.ui.refactoring,
+ org.eclipse.ltk.core.refactoring,
+ org.eclipse.core.resources,
+ org.eclipse.jface.text,
+ org.eclipse.photran.ui,
+ org.eclipse.rephraserengine.core.refactoring,
+ org.eclipse.rephraserengine.core.vpg,
+ org.eclipse.rephraserengine.ui.refactoring
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: org.earthsystemmodeling.refactor
