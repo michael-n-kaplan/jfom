@@ -1,197 +1,243 @@
-/*******************************************************************************
- * Copyright (c) 2008 University of Illinois at Urbana-Champaign and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     UIUC - Initial API and implementation
- *******************************************************************************/
 package org.earthsystemmodeling.refactor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.photran.internal.core.analysis.binding.Definition;
+import org.eclipse.photran.internal.core.analysis.binding.ScopingNode;
+import org.eclipse.photran.internal.core.analysis.types.Type;
 import org.eclipse.photran.internal.core.lexer.Token;
-import org.eclipse.photran.internal.core.parser.ASTFunctionSubprogramNode;
-import org.eclipse.photran.internal.core.parser.ASTMainProgramNode;
-import org.eclipse.photran.internal.core.parser.ASTSubroutineSubprogramNode;
-import org.eclipse.photran.internal.core.parser.Parser.GenericASTVisitor;
+import org.eclipse.photran.internal.core.parser.IBodyConstruct;
+import org.eclipse.photran.internal.core.parser.Parser.IASTListNode;
+import org.eclipse.photran.internal.core.parser.Parser.IASTNode;
+import org.eclipse.photran.internal.core.refactoring.infrastructure.Reindenter;
 import org.eclipse.photran.internal.core.refactoring.infrastructure.SingleFileFortranRefactoring;
-import org.eclipse.photran.internal.core.util.IterableWrapper;
+import org.eclipse.photran.internal.core.vpg.PhotranTokenRef;
+import org.eclipse.rephraserengine.core.vpg.TokenRef;
 
 /**
- * This class replaces all comments from the current class with meaningless
- * ones.
- * 
- * @author Nicholas Chen
- * @author Jeff Overbey
+ * @author Rocky Dunlap
  */
-public class NativeArrayToESMFArray extends SingleFileFortranRefactoring
-{
-    private static final String COMMENT_SYMBOL = "!";
+public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
+//    private static final String COMMENT_SYMBOL = "!";
+//
+//    private Map<Token, String> tokensWithCommentsBefore;
+//    private Map<Token, String> tokensWithCommentsAfter;
+//    private StringBuilder functionsAndSubroutineNames;
+//    private Token mainProgramToken;
+	
+	public Token nativeArrayToken;
+	private Definition def;
+	private ScopingNode defScopeNode;
+	
+	private String esmfArrayName;
+	private String esmfDistGridName;
+	private String esmfArraySpecName;
 
-    private Map<Token, String> tokensWithCommentsBefore;
-    private Map<Token, String> tokensWithCommentsAfter;
-    private StringBuilder functionsAndSubroutineNames;
-    private Token mainProgramToken;
+    public NativeArrayToESMFArray() {
 
-    /**
-     * This simple utility class just encapsulates the task of removing the
-     * comments from the whitespace since everything is lumped together. See
-     * {@link edu.uiuc.nchen.obfuscator.test.CommentRemoverTest} for examples of
-     * strings that need to be removed.
-     * 
-     * @author Nicholas Chen
-     */
-    public static class CommentRemover
-    {
-        private static final String COMMENT_REGEX = "!.*";
-
-        public static boolean hasComments(String string)
-        {
-            return string.indexOf(COMMENT_SYMBOL) != -1;
-        }
-
-        public static String removeCommentsFrom(String string)
-        {
-            return string.replaceAll(COMMENT_REGEX, "");
-        }
     }
 
-    public NativeArrayToESMFArray()
-    {
-        tokensWithCommentsBefore = new HashMap<Token, String>();
-        tokensWithCommentsAfter = new HashMap<Token, String>();
-        functionsAndSubroutineNames = new StringBuilder();
-    }
-
-    /*
-     * For this simple refactoring we don't really have any initial/final
-     * conditions to check. We are just using the initial condition
-     * method call as a hook for doing some initial information collection work.
-     */
     @Override
-    protected void doCheckInitialConditions(RefactoringStatus status,
-        IProgressMonitor pm) throws PreconditionFailure
-    {
-        astOfFileInEditor.accept(new GenericASTVisitor()
-        {
-            @Override
-            public void visitASTMainProgramNode(ASTMainProgramNode node)
-            {
-                mainProgramToken = node.findFirstToken();
-            }
-
-            @Override
-            public void visitASTSubroutineSubprogramNode(
-                ASTSubroutineSubprogramNode node)
-            {
-                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
-                    + node.getRepresentativeToken().getText() + "\n");
-            }
-
-            @Override
-            public void visitASTFunctionSubprogramNode(
-                ASTFunctionSubprogramNode node)
-            {
-                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
-                    + node.getRepresentativeToken().getText() + "\n");
-            }
-        });
-
-        if (functionsAndSubroutineNames.length() != 0)
-            functionsAndSubroutineNames.insert(0,
-                "\n" + COMMENT_SYMBOL +
-                " This file contains the following functions/subroutines: \n");
+    protected void doCheckInitialConditions(RefactoringStatus status, IProgressMonitor pm) throws PreconditionFailure {
+    	    	
+    	
+    	nativeArrayToken = findEnclosingToken();
+    	if (!nativeArrayToken.isIdentifier()) {
+    		fail("Not an identifier.");
+    	}    	
+    	
+    	//is this an array?
+    	List<Definition> nativeArrayDefs = nativeArrayToken.resolveBinding();
+    	if (nativeArrayDefs.size() != 1) {
+    		fail("Must be one definition only.");
+    	}
+    	
+    	def = nativeArrayDefs.get(0);
+    	if (!def.isArray()) {
+    		fail("Must be an array.");
+    	}
+    	
+    	
+    	
+    	Token defToken = def.getTokenRef().findToken();
+    	defScopeNode = defToken.getEnclosingScope();
+  
+    	esmfArrayName = nativeArrayToken.getText() + "_ESMF_Array";
+    	esmfArraySpecName = nativeArrayToken.getText() + "_ESMF_ArraySpec";
+    	esmfDistGridName = nativeArrayToken.getText() + "_ESMF_DistGrid";
+    	
+    	
+    	
+//        astOfFileInEditor.accept(new GenericASTVisitor()
+//        {
+//            @Override
+//            public void visitASTMainProgramNode(ASTMainProgramNode node)
+//            {
+//                mainProgramToken = node.findFirstToken();
+//            }
+//
+//            @Override
+//            public void visitASTSubroutineSubprogramNode(
+//                ASTSubroutineSubprogramNode node)
+//            {
+//                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
+//                    + node.getRepresentativeToken().getText() + "\n");
+//            }
+//
+//            @Override
+//            public void visitASTFunctionSubprogramNode(
+//                ASTFunctionSubprogramNode node)
+//            {
+//                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
+//                    + node.getRepresentativeToken().getText() + "\n");
+//            }
+//        });
+//
+//        if (functionsAndSubroutineNames.length() != 0)
+//            functionsAndSubroutineNames.insert(0,
+//                "\n" + COMMENT_SYMBOL +
+//                " This file contains the following functions/subroutines: \n");
 
         return;
     }
 
     @Override
-    protected void doCheckFinalConditions(RefactoringStatus status,
-        IProgressMonitor pm) throws PreconditionFailure
-    {
+    protected void doCheckFinalConditions(RefactoringStatus status, IProgressMonitor pm) throws PreconditionFailure {
         return;
     }
 
-    @Override
-    protected void doCreateChange(IProgressMonitor pm) throws CoreException,
-        OperationCanceledException
-    {
-        // Query
-        retrieveComments();
+    
+	@SuppressWarnings("unchecked")
+	@Override
+    protected void doCreateChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+        
+    	try {    		    		
+    		
+    		IASTListNode<IBodyConstruct> body = (IASTListNode<IBodyConstruct>) defScopeNode.getBody();
+    		int idx = findIndexToInsertTypeDeclaration(body);
+    		    		
+    		String lit;
+    		IBodyConstruct ibc;
+    		
+    		lit = "type(ESMF_Array) :: " + esmfArrayName;
+	    	ibc = parseLiteralStatement(lit);    		
+    		body.add(idx, ibc);
+    		
+    		lit = "type(ESMF_ArraySpec) :: " + esmfArraySpecName;
+	    	ibc = parseLiteralStatement(lit);    		
+    		body.add(idx+1, ibc);
+    		
+    		lit = "type(ESMF_DistGrid) :: " + esmfDistGridName;
+	    	ibc = parseLiteralStatement(lit);    		
+    		body.add(idx+2, ibc);
+    		
+    		Reindenter.reindent(body, astOfFileInEditor);
+    		
+    		
+    		
+    		List<PhotranTokenRef> refs = sortRefsByOffset(def.findAllReferences(false));
+    		//System.out.println("sizes: " + refs.size() + " - " + def.findAllReferences(false).size());
+        	        	    	        
+    		if (refs.size() == 0) {
+    			fail("Array is never used.");
+    		}
+        	
+    		//set up ArraySpec before first use
+    		ScopingNode firstUseScope = refs.get(0).findToken().getLocalScope();
+    		System.out.println("local scope of first use = " + firstUseScope + "\n\n");
+    		
+    		if (!firstUseScope.isSubprogram()) {
+    			fail("Array's first use not inside subprogram.");
+    		}
+    		
+    		body = (IASTListNode<IBodyConstruct>) firstUseScope.getBody();
+    		idx = findIndexToInsertStatement(body);
+    		
+    		//call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
+    	    //if (rc/=ESMF_SUCCESS) return ! bail out
+    		String typekind = "";
+    		if (def.getType().equals(Type.REAL)) {
+    			typekind = "ESMF_TYPEKIND_R8";
+    		}
+    		else {
+    			fail("Only arrays of reals supported.");
+    		}
+    		
+    		int rank = def.getArraySpec().getRank();
+    		
+    		lit = "call ESMF_ArraySpecSet(" + esmfArraySpecName  + ", typekind=" + typekind + " rank=" + rank + " rc=???)";
+	    	ibc = parseLiteralStatement(lit);    		
+    		body.add(idx, ibc);
+    		
+    		Reindenter.reindent(body, astOfFileInEditor);
+    		
+    		addChangeFromModifiedAST(fileInEditor, pm);
+    		
+	    	//String lit = "distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/xmax,xmax/), regDecomp=(/1,1/), rc=rc)";
+	    	//String lit = "real :: ABC";
+    		//IBodyConstruct ibc = parseLiteralStatement(lit);
+	    	//System.out.println("ibc = " + ibc);
+//	    	ScopingNode sn = nativeArrayToken.getEnclosingScope();
+//	    	ScopingNode ls = nativeArrayToken.getLocalScope();
+//	    	ScopingNode di = nativeArrayToken.findScopeDeclaringOrImporting(nativeArrayToken.resolveBinding().get(0));
+//	    	
+//	    	System.out.println("Enclosing scope = " + sn + "\n\n");
+//	    	System.out.println("Local scope = " + ls + "\n\n");
+//	    	System.out.println("Declaring/importing scope = " + di + "\n\n");
+	    	
+	    	
+	    	
+	    	//IASTListNode ln = nativeArrayToken.findNearestAncestor(IASTListNode.class);
+	    	//ln.add(0, ibc);
+	    	
+	    	//addChangeFromModifiedAST(this.fileInEditor, pm);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    	// Query
+       // retrieveComments();
 
         // Modify
-        addMeaninglessHeader();
-        removeComments();
+      //  addMeaninglessHeader();
+       // removeComments();
 
-        addChangeFromModifiedAST(fileInEditor, pm);
-        vpg.releaseAllASTs();
+      //  addChangeFromModifiedAST(fileInEditor, pm);
+       // vpg.releaseAllASTs();
     }
-
-    /**
-     * Store all the tokens that have comments. This must be done in one pass
-     * before any modification is done to the AST.
-     * <p>
-     * Instead if you <b>interleave</b> and <b>repeat</b> querying/modifying the
-     * AST e.g.
-     * <ul>
-     * <li>token.getWhiteBefore() // query</li>
-     * <li>token.setWhiteBefore() // modify</li>
-     * <li>token.getWhiteBefore() // query</li>
-     * <li>token.setWhiteBefore() // modify</li>
-     * <li>....</li>
-     * </ul>
-     * Then you will have an invalid AST and the queries will return invalid
-     * answers.
-     */
-    private void retrieveComments()
-    {
-        for (Token token : new IterableWrapper<Token>(astOfFileInEditor))
-        {
-            checkCommentsFor(token, token.getWhiteBefore(),
-                tokensWithCommentsBefore);
-            checkCommentsFor(token, token.getWhiteAfter(),
-                tokensWithCommentsAfter);
-        }
-    }
-
-    private void checkCommentsFor(Token token, String whiteSpace,
-        Map<Token, String> accumulator)
-    {
-        if (whiteSpace != null && CommentRemover.hasComments(whiteSpace))
-            accumulator.put(token,
-                CommentRemover.removeCommentsFrom(whiteSpace));
-    }
-
-    private void addMeaninglessHeader()
-    {
-        if (mainProgramToken != null)
-        {
-            String concat = mainProgramToken.getWhiteBefore().concat(
-                functionsAndSubroutineNames.toString());
-            mainProgramToken.setWhiteBefore(concat);
-        }
-    }
-
-    private void removeComments()
-    {
-        for (Token token : tokensWithCommentsBefore.keySet())
-            token.setWhiteBefore(tokensWithCommentsBefore.get(token));
     
-        for (Token token : tokensWithCommentsAfter.keySet())
-            token.setWhiteAfter(tokensWithCommentsAfter.get(token));
-    }
+	private List<PhotranTokenRef> sortRefsByOffset(Set<PhotranTokenRef> refs) {
+		ArrayList<PhotranTokenRef> ret = new ArrayList<PhotranTokenRef>();
+		
+		for (PhotranTokenRef ref : refs) {
+			for (int i = 0; i < ret.size(); i++) {
+				if (ref.getOffset() <= ret.get(i).getOffset()) {
+					ret.add(i, ref);
+					break;
+				}
+			}
+			ret.add(ref);
+		}
+		
+		return ret;
+	}
+	
+    private Token findEnclosingToken() throws PreconditionFailure  {
+		Token selectedToken = findEnclosingToken(this.astOfFileInEditor, this.selectedRegionInEditor);
+        if (selectedToken == null || !isIdentifier(selectedToken)) {
+            fail("Please select an identifier.");
+        }
+		return selectedToken;
+	}
 
+ 
     @Override
-    public String getName()
-    {
-        return "Token Changer";
+    public String getName() {
+        return "Native array to ESMF Array";
     }
 }

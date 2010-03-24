@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Token Changer Plug-in
-Bundle-SymbolicName: edu.uiuc.nchen.tokenchanger;singleton:=true
+Bundle-Name: ESMF Refactor Plugin
+Bundle-SymbolicName: org.earthsystemmodeling.refactor;singleton:=true
 Bundle-Version: 1.0.0
-Bundle-Vendor: Nicholas Chen
+Bundle-Vendor: Rocky Dunlap
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.photran.ui.vpg,
