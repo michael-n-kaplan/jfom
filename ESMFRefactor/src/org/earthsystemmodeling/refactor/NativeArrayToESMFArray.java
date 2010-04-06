@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.earthsystemmodeling.refactor.heuristics.EndOfEnclosingScopeSpecPart;
+import org.earthsystemmodeling.refactor.heuristics.InsertDeclarationConstruct;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -12,13 +14,13 @@ import org.eclipse.photran.internal.core.analysis.binding.Definition;
 import org.eclipse.photran.internal.core.analysis.binding.ScopingNode;
 import org.eclipse.photran.internal.core.analysis.types.Type;
 import org.eclipse.photran.internal.core.lexer.Token;
+import org.eclipse.photran.internal.core.parser.ASTCallStmtNode;
 import org.eclipse.photran.internal.core.parser.IBodyConstruct;
+import org.eclipse.photran.internal.core.parser.IDeclarationConstruct;
 import org.eclipse.photran.internal.core.parser.Parser.IASTListNode;
-import org.eclipse.photran.internal.core.parser.Parser.IASTNode;
 import org.eclipse.photran.internal.core.refactoring.infrastructure.Reindenter;
 import org.eclipse.photran.internal.core.refactoring.infrastructure.SingleFileFortranRefactoring;
 import org.eclipse.photran.internal.core.vpg.PhotranTokenRef;
-import org.eclipse.rephraserengine.core.vpg.TokenRef;
 
 /**
  * @author Rocky Dunlap
@@ -32,6 +34,7 @@ public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
 //    private Token mainProgramToken;
 	
 	public Token nativeArrayToken;
+	private Token defToken;
 	private Definition def;
 	private ScopingNode defScopeNode;
 	
@@ -62,48 +65,14 @@ public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
     	if (!def.isArray()) {
     		fail("Must be an array.");
     	}
-    	
-    	
-    	
-    	Token defToken = def.getTokenRef().findToken();
+    	    	   
+    	defToken = def.getTokenRef().findToken();
     	defScopeNode = defToken.getEnclosingScope();
   
     	esmfArrayName = nativeArrayToken.getText() + "_ESMF_Array";
     	esmfArraySpecName = nativeArrayToken.getText() + "_ESMF_ArraySpec";
     	esmfDistGridName = nativeArrayToken.getText() + "_ESMF_DistGrid";
-    	
-    	
-    	
-//        astOfFileInEditor.accept(new GenericASTVisitor()
-//        {
-//            @Override
-//            public void visitASTMainProgramNode(ASTMainProgramNode node)
-//            {
-//                mainProgramToken = node.findFirstToken();
-//            }
-//
-//            @Override
-//            public void visitASTSubroutineSubprogramNode(
-//                ASTSubroutineSubprogramNode node)
-//            {
-//                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
-//                    + node.getRepresentativeToken().getText() + "\n");
-//            }
-//
-//            @Override
-//            public void visitASTFunctionSubprogramNode(
-//                ASTFunctionSubprogramNode node)
-//            {
-//                functionsAndSubroutineNames.append(COMMENT_SYMBOL + " "
-//                    + node.getRepresentativeToken().getText() + "\n");
-//            }
-//        });
-//
-//        if (functionsAndSubroutineNames.length() != 0)
-//            functionsAndSubroutineNames.insert(0,
-//                "\n" + COMMENT_SYMBOL +
-//                " This file contains the following functions/subroutines: \n");
-
+ 	       
         return;
     }
 
@@ -119,25 +88,32 @@ public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
         
     	try {    		    		
     		
-    		IASTListNode<IBodyConstruct> body = (IASTListNode<IBodyConstruct>) defScopeNode.getBody();
-    		int idx = findIndexToInsertTypeDeclaration(body);
+    		//IASTListNode<IBodyConstruct> body = (IASTListNode<IBodyConstruct>) defScopeNode.getBody();
+    		//int idx = findIndexToInsertTypeDeclaration(body);
     		    		
     		String lit;
-    		IBodyConstruct ibc;
+    		IDeclarationConstruct idc;
+    		
+    		InsertDeclarationConstruct insertGoal = new InsertDeclarationConstruct();
+    		insertGoal.addLocationHeuristic(new EndOfEnclosingScopeSpecPart());
     		
     		lit = "type(ESMF_Array) :: " + esmfArrayName;
-	    	ibc = parseLiteralStatement(lit);    		
-    		body.add(idx, ibc);
-    		
+	    	idc = (IDeclarationConstruct) parseLiteralStatement(lit);    		
+    		insertGoal.go(idc, defToken);
+    		Reindenter.reindent(idc, astOfFileInEditor);
+	    	
     		lit = "type(ESMF_ArraySpec) :: " + esmfArraySpecName;
-	    	ibc = parseLiteralStatement(lit);    		
-    		body.add(idx+1, ibc);
+	    	idc = (IDeclarationConstruct) parseLiteralStatement(lit);    		
+	    	insertGoal.go(idc, defToken);
+	    	Reindenter.reindent(idc, astOfFileInEditor);
     		
     		lit = "type(ESMF_DistGrid) :: " + esmfDistGridName;
-	    	ibc = parseLiteralStatement(lit);    		
-    		body.add(idx+2, ibc);
+	    	idc = (IDeclarationConstruct) parseLiteralStatement(lit);
+	    	insertGoal.go(idc, defToken);
+	    	Reindenter.reindent(idc, astOfFileInEditor);
     		
-    		Reindenter.reindent(body, astOfFileInEditor);
+    		
+    		//Reindenter.reindent(idc, astOfFileInEditor);
     		
     		
     		
@@ -150,14 +126,14 @@ public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
         	
     		//set up ArraySpec before first use
     		ScopingNode firstUseScope = refs.get(0).findToken().getLocalScope();
-    		System.out.println("local scope of first use = " + firstUseScope + "\n\n");
+    		//System.out.println("local scope of first use = " + firstUseScope + "\n\n");
     		
     		if (!firstUseScope.isSubprogram()) {
     			fail("Array's first use not inside subprogram.");
     		}
     		
-    		body = (IASTListNode<IBodyConstruct>) firstUseScope.getBody();
-    		idx = findIndexToInsertStatement(body);
+    		IASTListNode<IBodyConstruct> body = (IASTListNode<IBodyConstruct>) firstUseScope.getBody();
+    		int idx = findIndexToInsertStatement(body);
     		
     		//call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     	    //if (rc/=ESMF_SUCCESS) return ! bail out
@@ -171,11 +147,12 @@ public class NativeArrayToESMFArray extends SingleFileFortranRefactoring {
     		
     		int rank = def.getArraySpec().getRank();
     		
-    		lit = "call ESMF_ArraySpecSet(" + esmfArraySpecName  + ", typekind=" + typekind + " rank=" + rank + " rc=???)";
-	    	ibc = parseLiteralStatement(lit);    		
-    		body.add(idx, ibc);
+    		lit = "call ESMF_ArraySpecSet(" + esmfArraySpecName  + ", typekind=" + typekind + ", rank=" + rank + ", rc=rc)";
+	    	System.out.println(lit);
+    		ASTCallStmtNode callStmt = (ASTCallStmtNode) parseLiteralStatement(lit);    		
+    		body.add(idx, callStmt);
     		
-    		Reindenter.reindent(body, astOfFileInEditor);
+    		Reindenter.reindent(callStmt, astOfFileInEditor);
     		
     		addChangeFromModifiedAST(fileInEditor, pm);
     		
