@@ -9,8 +9,78 @@
       <group>
          <editorRefactoring
              class="org.earthsystemmodeling.refactor.NativeArrayToESMFArray"
-             inputPage="org.earthsystemmodeling.refactor.ui.NativeArrayToESMFArrayInputPage"
-         />
+             inputPage="org.earthsystemmodeling.refactor.ui.NativeArrayToESMFArrayInputPage"/>
+         <editorRefactoring
+             class="org.earthsystemmodeling.refactor.ConvertToESMFInit"
+             inputPage="org.earthsystemmodeling.refactor.ui.ConvertToESMFInitInputPage"/>
       </group>
    </extension>
+      
+   <extension point="org.eclipse.ui.newWizards">
+      <category
+            name="ESMF"
+            id="org.earthsystemmodeling.wizards" />
+
+      <!-- New File Wizards -->
+      <wizard
+            name="ESMF Component"
+            icon="icons/newfortranfile_wiz.gif"
+            category="org.earthsystemmodeling.wizards"
+            finalPerspective="org.eclipse.photran.ui.FortranPerspective"
+            id="org.eclipse.photran.ui.wizards.ESMFComponentCreationWizard">
+         <class class="org.earthsystemmodeling.ui.ESMFComponentCreationWizard">
+            <parameter name="cfile" value="true"/>
+         </class>
+         <description>
+            Create a new ESMF Component
+         </description>
+      </wizard>
+   </extension> 
+   
+   <extension point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="ESMF Element Creation Action Set"
+            id="org.earthsystemmodeling.ESMFElementCreationActionSet"
+            label="ESMF Element Creation"
+            visible="false">
+         <action
+               class="org.earthsystemmodeling.ui.ESMFComponentDropDownAction"
+               icon="icons/newfortranfile_wiz.gif"
+               id="org.earthsystemmodeling.actions.ESMFComponentDropDown"
+               label="&amp;ESMF Component..."
+               style="pulldown"
+               toolbarPath="Normal/ESMFWizards"
+               tooltip="New ESMF Component"/>
+               <!--
+         <action
+               class="org.eclipse.photran.internal.cdtinterface.ui.NewFolderDropDownAction"
+               icon="icons/etool16/newsrcfldr_wiz.gif"
+               id="org.eclipse.photran.cdtinterface.actions.NewFolderDropDown"
+               label="&amp;Source Folder..."
+               style="pulldown"
+               toolbarPath="Normal/FortranWizards"
+               tooltip="New Source Folder"/>
+         <action
+               class="org.eclipse.photran.internal.cdtinterface.ui.NewProjectDropDownAction"
+               icon="icons/etool16/newfortran_app.gif"
+               id="org.eclipse.photran.cdtinterface.actions.NewProjectDropDown"
+               label="&amp;Project..."
+               style="pulldown"
+               toolbarPath="Normal/FortranWizards"
+               tooltip="New Compiled Language Project"/>
+               -->
+      </actionSet>
+   </extension>  
+   
+   <extension
+         point="org.eclipse.ui.editors.templates">
+      <!--contextType
+            name="%c.contextType.name"
+            class="org.eclipse.cdt.internal.corext.template.c.CContextType"
+            id="org.eclipse.cdt.ui.text.templates.c">
+      </contextType-->
+      <include file="templates/esmf-codetemplates.xml" />
+   </extension>
+      
+   
 </plugin>
