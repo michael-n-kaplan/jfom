@@ -27,7 +27,7 @@ import org.eclipse.photran.internal.core.parser.Parser.IASTListNode;
 @SuppressWarnings("restriction")
 public class ESMFComponentCreationWizardPage extends org.eclipse.cdt.internal.ui.wizards.filewizard.NewSourceFileCreationWizardPage {
 	
-	public static final String TEMPLATE_ID = "org.eclipse.photran.codetemplates.yourmom";
+	public static final String TEMPLATE_ID = "org.earthsystemmodeling.component";
 	
 	@Override
 	protected Template[] getApplicableTemplates() {

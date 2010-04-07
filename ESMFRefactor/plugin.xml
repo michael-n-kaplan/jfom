@@ -81,6 +81,14 @@
       </contextType-->
       <include file="templates/esmf-codetemplates.xml" />
    </extension>
+   
+   <extension
+         point="org.eclipse.photran.cdtinterface.modelbuilder">
+      <modelbuilder
+            class="org.earthsystemmodeling.model.ESMFModelBuilder"
+            id="esmfModelBilder"
+            name="ESMF Model Builder" />
+   </extension>
       
    
 </plugin>

@@ -13,9 +13,9 @@
 -->
 
 <template
-    name="Fortran YOUR MOM"
-    id="org.eclipse.photran.codetemplates.yourmom"
-    description="Fortran 90 YOUR MOM module (free format)"
+    name="ESMF Gridded Component"
+    id="org.earthsystemmodeling.component"
+    description="Template for ESMF Gridded Component"
     context="org.eclipse.photran.core.freeFormFortranSource.contenttype_context"
     enabled="true">module ${file_base}
 
@@ -96,7 +96,7 @@
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-	  	subroutine final(comp, importState, exportState, clock, rc)
+	subroutine final(comp, importState, exportState, clock, rc)
 	    type(ESMF_GridComp) :: comp
 	    type(ESMF_State) :: importState, exportState
 	    type(ESMF_Clock) :: clock
