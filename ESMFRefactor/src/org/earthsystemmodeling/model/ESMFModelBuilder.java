@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.earthsystemmodeling.model.ESMFElement.ESMFExecutionGroup;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.IContributedModelBuilder;
@@ -17,6 +18,7 @@ import org.eclipse.photran.internal.core.lexer.IAccumulatingLexer;
 import org.eclipse.photran.internal.core.lexer.LexerFactory;
 import org.eclipse.photran.internal.core.lexer.SourceForm;
 import org.eclipse.photran.internal.core.lexer.preprocessor.fortran_include.IncludeLoaderCallback;
+import org.eclipse.photran.internal.core.parser.ASTModuleNode;
 import org.eclipse.photran.internal.core.parser.Parser;
 
 import org.eclipse.photran.internal.core.model.IFortranModelBuilder;
@@ -25,8 +27,10 @@ import org.eclipse.photran.internal.core.model.IFortranModelBuilder;
 public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModelBuilder
 {
     private TranslationUnit translationUnit;
-    private Map<ICElement, Object /*CElementInfo*/> newElements;
+    //private Map<ICElement, Object /*CElementInfo*/> newElements;
     private boolean isFixedForm;
+    
+    private ESMFExecutionGroup executionGroup = null;
 
     public void setTranslationUnit(ITranslationUnit tu)
     {
@@ -43,7 +47,7 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
 
     public void parse(boolean quickParseMode) throws Exception
     {
-        this.newElements = new HashMap<ICElement, Object /*CElementInfo*/>();
+        //this.newElements = new HashMap<ICElement, Object /*CElementInfo*/>();
         boolean wasSuccessful = true;
 
         IAccumulatingLexer lexer = null;
@@ -61,9 +65,15 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
  
             IFortranAST ast = new FortranAST(file, new Parser().parse(lexer), lexer.getTokenList());
 
-            createSourceFormNode(sourceForm.getDescription(filename));
+            //see if we can determine the kind of ESMF component that this is
+            if (isESMFGriddedComponent(ast)) {
+            	setUpModelForGriddedComponent(filename);
+            	ast.accept(new ESMFModelGriddedComponentBuildingVisitor(translationUnit, this));
+            }
+            
+           // setUpModelForGriddedComponent();
 
-            ast.accept(new ESMFModelBuildingVisitor(translationUnit, this));
+           // ast.accept(new ESMFModelBuildingVisitor(translationUnit, this));
  
             
             //FortranElement note = new FortranElement.UnknownNode(translationUnit, isFixedForm ? "<Fixed Form Source>" : "<Free Form Source>");
@@ -133,21 +143,19 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
         translationUnit.setIsStructureKnown(isStructureKnown);
     }
 
-    private ESMFElement createSourceFormNode(String desc) throws CModelException
-    {
-        desc = "<" + desc + ">";
-        ESMFElement element = new ESMFElement.UnknownNode(translationUnit, desc);
+    private void setUpModelForGriddedComponent(String name) throws CModelException {
+        ESMFElement.ESMFGriddedComponent element = new ESMFElement.ESMFGriddedComponent(translationUnit, name);
         translationUnit.addChild(element);
-        this.newElements.put(element, element.getElementInfo());
-        return element;
-
+        
+        this.executionGroup = new ESMFElement.ESMFExecutionGroup(element);
+        element.addChild(this.executionGroup);       
     }
 
 
     private ESMFElement createParseFailureNode(Parent parent, String errorMessage) throws CModelException {
         ESMFElement element = new ESMFElement.ErrorNode(parent, errorMessage);
         parent.addChild(element);
-        this.newElements.put(element, element.getElementInfo());
+        //this.newElements.put(element, element.getElementInfo());
         return element;
     }
 
@@ -157,8 +165,24 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
         ICElement parent = element.getParent();
         if (parent instanceof Parent) ((Parent)parent).addChild(element);
 
-        this.newElements.put(element, element.getElementInfo());
+        //this.newElements.put(element, element.getElementInfo());
 
         return element;
     }
+    
+    public ESMFElement addToExecutionGroup(ESMFElement element) throws CModelException {
+    	this.executionGroup.addChild(element);
+    	return element;
+    }
+    
+    public boolean isESMFGriddedComponent(IFortranAST ast) {
+    	ASTModuleNode node = ast.getRoot().findFirst(ASTModuleNode.class);
+    	if (node != null) {
+    		if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.gridded_component)) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
 }

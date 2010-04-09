@@ -2,24 +2,28 @@ package org.earthsystemmodeling.model;
 
 import java.util.LinkedList;
 
+import org.earthsystemmodeling.model.ESMFElement.ESMFExecutionGroup;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.core.model.Parent;
 import org.eclipse.cdt.internal.core.model.TranslationUnit;
 import org.eclipse.photran.internal.core.lexer.Token;
+import org.eclipse.photran.internal.core.parser.ASTDerivedTypeStmtNode;
 import org.eclipse.photran.internal.core.parser.ASTModuleNode;
 import org.eclipse.photran.internal.core.parser.ASTSubroutineSubprogramNode;
+import org.eclipse.photran.internal.core.parser.ASTTypeDeclarationStmtNode;
+import org.eclipse.photran.internal.core.parser.IDeclarationConstruct;
 import org.eclipse.photran.internal.core.parser.Parser.GenericASTVisitor;
 import org.eclipse.photran.internal.core.parser.Parser.IASTNode;
 
 @SuppressWarnings("restriction")
-public final class ESMFModelBuildingVisitor extends GenericASTVisitor
+public final class ESMFModelGriddedComponentBuildingVisitor extends GenericASTVisitor
 {
  
     private TranslationUnit translationUnit;
     
     private ESMFModelBuilder modelBuilder;
 
-    public ESMFModelBuildingVisitor(TranslationUnit translationUnit, ESMFModelBuilder modelBuilder) {
+    public ESMFModelGriddedComponentBuildingVisitor(TranslationUnit translationUnit, ESMFModelBuilder modelBuilder) {
         this.translationUnit = translationUnit;
         this.modelBuilder = modelBuilder;
     }
@@ -27,13 +31,13 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
     private LinkedList<IASTNode> parentParseTreeNodeStack = new LinkedList<IASTNode>();
 
     private LinkedList<ESMFElement> parentElementStack = new LinkedList<ESMFElement>();
-
+    
     private Parent getCurrentParent()
     {
         if (parentElementStack.isEmpty())
             return translationUnit;
         else
-            return (Parent)parentElementStack.getLast();
+            return (Parent) parentElementStack.getLast();
     }
 
     private boolean isCurrentParent(IASTNode node)
@@ -41,7 +45,7 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
         if (parentParseTreeNodeStack.isEmpty())
             return false;
         else
-            return node == (IASTNode)parentParseTreeNodeStack.getLast();
+            return node == (IASTNode) parentParseTreeNodeStack.getLast();
     }
 
     private void addToModel(IASTNode parseTreeNode, ESMFElement element)
@@ -56,6 +60,20 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
             e.printStackTrace();
         }
     }
+    
+    private void addToExecutionGroup(ESMFElement element) {
+    	try {
+			modelBuilder.addToExecutionGroup(element);
+		} catch (CModelException e) {			
+			e.printStackTrace();
+		}
+    }
+   
+    /*
+    private void addToExecutionGroup(IASTNode parseTreeNode, ESMFElement element) {    	
+		executionGroup.addChild(element);		
+    }
+    */
 
 //    private void addToModelNoChildren(ESMFElement element)
 //    {
@@ -91,6 +109,7 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
         // beginAddingChildrenFor is called in addToModel
         traverseChildren(node);
         doneAddingChildrenFor(node);
+        //super.visitASTDerivedTypeStmtNode(node)
     }
 
     private <T extends ESMFElement> T setPos(T element, IASTNode astNode) {
@@ -114,12 +133,24 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
 //            : node.getProgramStmt().getProgramName().getProgramName();
 //        addToModel(node, setPos(new FortranElement.MainProgram(getCurrentParent(), token), node));
 //    }
+    
 
-    public void visitASTModuleNode(ASTModuleNode node)
-    {
-        Token token = node.getModuleStmt().getModuleName().getModuleName();
-        addToModel(node, setPos(new ESMFElement.ESMFGriddedComponent(getCurrentParent(), token), node));
+    
+    @Override
+    public void visitASTTypeDeclarationStmtNode(ASTTypeDeclarationStmtNode node) {
+    	if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.array)) {
+    		Token token = node.getEntityDeclList().get(0).getObjectName().getObjectName();
+    		addToModel(node, setPos(new ESMFElement.ESMFArray(getCurrentParent(), token), node));
+    	}    
     }
+
+//    @Override
+//    public void visitASTModuleNode(ASTModuleNode node) {
+//    	if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.gridded_component)) {
+//    		Token token = node.getModuleStmt().getModuleName().getModuleName();
+//    		addToModel(node, setPos(new ESMFElement.ESMFGriddedComponent(getCurrentParent(), token), node));
+//    	}    
+//    }
 
 //    public void visitASTSubmoduleNode(ASTSubmoduleNode node)
 //    {
@@ -133,18 +164,21 @@ public final class ESMFModelBuildingVisitor extends GenericASTVisitor
 //        addToModel(node, setPos(new FortranElement.Function(getCurrentParent(), token), node));
 //    }
 
-    public void visitASTSubroutineSubprogramNode(ASTSubroutineSubprogramNode node)
-    {
+    public void visitASTSubroutineSubprogramNode(ASTSubroutineSubprogramNode node) {
         Token token = node.getSubroutineStmt().getSubroutineName().getSubroutineName();
-        if (token.getText().contains("init")) {
-        	addToModel(node, setPos(new ESMFElement.ESMFInitializeMethod(getCurrentParent(), token), node));
+        
+        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.init)) {        	
+        	addToExecutionGroup(setPos(new ESMFElement.ESMFInitializeMethod(getCurrentParent(), token), node));
         }
-        else if (token.getText().contains("run")) {
-        	addToModel(node, setPos(new ESMFElement.ESMFRunMethod(getCurrentParent(), token), node));
+        
+        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.run)) {
+        	addToExecutionGroup(setPos(new ESMFElement.ESMFRunMethod(getCurrentParent(), token), node));
         }
-        else if (token.getText().contains("finalize")) {
-        	addToModel(node, setPos(new ESMFElement.ESMFFinalizeMethod(getCurrentParent(), token), node));
+        
+        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.finalize)) {
+        	addToExecutionGroup(setPos(new ESMFElement.ESMFFinalizeMethod(getCurrentParent(), token), node));
         }
+        
     }
 
 //    public void visitASTSpecificBindingNode(ASTSpecificBindingNode node)

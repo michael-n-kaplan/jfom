@@ -92,6 +92,8 @@ public abstract class ESMFElement extends SourceManipulation // Parent
 		else
 			return super.getAdapter(required);
 	}
+	
+	
 
 	protected abstract ImageDescriptor getBaseImageDescriptor();
 		
@@ -163,6 +165,10 @@ public abstract class ESMFElement extends SourceManipulation // Parent
         {
             super(parent, nameToken);
         }
+        
+        public ESMFGriddedComponent(Parent parent, String name) {
+        	super(parent, name);
+        }
 
         public ImageDescriptor getBaseImageDescriptor()
         {
@@ -173,6 +179,34 @@ public abstract class ESMFElement extends SourceManipulation // Parent
         {
             return getImageDescriptorForIcon("module.gif");
         }
+        
+        @Override
+    	public String getElementName() {
+        	return "gridded component (" + super.getElementName() + ")";
+    	}
+    }
+    
+    public static class ESMFExecutionGroup extends ESMFElement
+    {
+        public ESMFExecutionGroup(Parent parent)
+        {
+            super(parent, "");
+        }
+
+        public ImageDescriptor getBaseImageDescriptor()
+        {
+            return imageDescriptor();
+        }
+
+        public static ImageDescriptor imageDescriptor()
+        {
+            return getImageDescriptorForIcon("module.gif");
+        }
+        
+        @Override
+    	public String getElementName() {
+        	return "execution stages";
+    	}
     }
     
     public static class ESMFInitializeMethod extends ESMFElement
@@ -191,6 +225,11 @@ public abstract class ESMFElement extends SourceManipulation // Parent
         {
             return getImageDescriptorForIcon("subroutine.gif");
         }
+        
+        @Override
+    	public String getElementName() {
+    		return "init (" + super.getElementName() + ")";
+    	}
     }
     
     public static class ESMFRunMethod extends ESMFElement
@@ -209,6 +248,11 @@ public abstract class ESMFElement extends SourceManipulation // Parent
         {
             return getImageDescriptorForIcon("subroutine.gif");
         }
+        
+        @Override
+    	public String getElementName() {
+        	return "run (" + super.getElementName() + ")";
+    	}
     }
     
     public static class ESMFFinalizeMethod extends ESMFElement
@@ -227,6 +271,34 @@ public abstract class ESMFElement extends SourceManipulation // Parent
         {
             return getImageDescriptorForIcon("subroutine.gif");
         }
+        
+        @Override
+    	public String getElementName() {
+        	return "finalize (" + super.getElementName() + ")";
+    	}
+    }
+    
+    public static class ESMFArray extends ESMFElement
+    {
+        public ESMFArray(Parent parent, IToken nameToken)
+        {
+            super(parent, nameToken);
+        }
+
+        public ImageDescriptor getBaseImageDescriptor()
+        {
+            return imageDescriptor();
+        }
+
+        public static ImageDescriptor imageDescriptor()
+        {
+            return getImageDescriptorForIcon("variable.gif");
+        }
+        
+        @Override
+    	public String getElementName() {
+    		return "array (" + super.getElementName() + ")";
+    	}
     }
     
 

@@ -13,6 +13,9 @@
          <editorRefactoring
              class="org.earthsystemmodeling.refactor.ConvertToESMFInit"
              inputPage="org.earthsystemmodeling.refactor.ui.ConvertToESMFInitInputPage"/>
+         <editorRefactoring
+             class="org.earthsystemmodeling.refactor.SetAsESMFInit"
+             inputPage="org.earthsystemmodeling.refactor.ui.SetAsESMFInitInputPage"/>
       </group>
    </extension>
       
