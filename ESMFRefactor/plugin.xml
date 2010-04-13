@@ -88,7 +88,7 @@
    <extension
          point="org.eclipse.photran.cdtinterface.modelbuilder">
       <modelbuilder
-            class="org.earthsystemmodeling.model.ESMFModelBuilder"
+            class="org.earthsystemmodeling.model.ui.ESMFModelBuilder"
             id="esmfModelBilder"
             name="ESMF Model Builder" />
    </extension>

@@ -8,7 +8,7 @@
  * Contributors:
  *     UIUC - Initial API and implementation
  *******************************************************************************/
-package org.earthsystemmodeling.model;
+package org.earthsystemmodeling.model.ui;
 
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.IContributedCElement;

@@ -17,14 +17,25 @@ public class ESMFAnnotationUtil {
 		return parseAnnotation(node.findFirstToken().getWhiteBefore());	
 	}
 	
-	public static boolean hasESMFAnnotationOfType(IASTNode node, ESMFAnnotation.Type t) {
+	public static boolean hasESMFAnnotation(IASTNode node, Class<? extends ESMFAnnotation> type) {
 		Set<ESMFAnnotation> anns = getESMFAnnotations(node);
 		for (ESMFAnnotation a : anns) {
-			if (a.getType().equals(t)) {
+			if (type.isAssignableFrom(a.getClass())) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends ESMFAnnotation> T getESMFAnnotation(IASTNode node, Class<T> type) {
+		Set<ESMFAnnotation> anns = getESMFAnnotations(node);
+		for (ESMFAnnotation ann : anns) {
+			if (type.isAssignableFrom(ann.getClass())) {
+				return (T) ann;
+			}
+		}
+		return null;
 	}
 	
 	private static final Pattern esmfAnnotationPattern = 
@@ -33,19 +44,22 @@ public class ESMFAnnotationUtil {
 	protected static Set<ESMFAnnotation> parseAnnotation(String text) {
 		Set<ESMFAnnotation> ret = new HashSet<ESMFAnnotation>();		
 		Matcher m = esmfAnnotationPattern.matcher(text);
-		while (m.find()) {
+		while (m.find()) {			
 			String annotationName = m.group(2);
 			String annotationParams = m.group(3);
 			//System.out.println(m.group(1) +  " : " + m.group(2) + " : " + m.group(3));
 						
 			try {
-				ESMFAnnotation ann = ESMFAnnotation.newAnnotation(ESMFAnnotation.Type.valueOf(annotationName));
-				ann.setParameters(parseParameters(annotationParams));
-				//need to parse parameters as well
-				ret.add(ann);
+				ESMFAnnotation ann = ESMFAnnotation.newAnnotation(annotationName);
+				if (ann != null) {
+					ann.setParameters(parseParameters(annotationParams));
+					//need to parse parameters as well
+					ret.add(ann);
+				}
 			}
 			catch (IllegalArgumentException iae) {
-				//ignore bad annotations				
+				//ignore bad annotations
+				iae.printStackTrace();
 			}
 			
 		}
@@ -65,6 +79,8 @@ public class ESMFAnnotationUtil {
 			p = p.trim();
 			if (p.contains("=")) {
 				String[] pp = p.split("=");
+				if (pp.length != 2)
+					continue;
 				String paramName = pp[0].trim();
 				String paramVal = pp[1].trim();
 				params.put(paramName, paramVal);

@@ -1,10 +1,14 @@
-package org.earthsystemmodeling.model;
+package org.earthsystemmodeling.model.ui;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.earthsystemmodeling.model.ESMFElement.ESMFExecutionGroup;
+import org.earthsystemcurator.esmf.ESMFFactory;
+import org.earthsystemcurator.esmf.ESMFWorkspace;
+import org.earthsystemcurator.esmf.FFramework;
+import org.earthsystemmodeling.model.AnnotationBasedModelBuilder;
+import org.earthsystemmodeling.model.ESMFAnnotationUtil;
+import org.earthsystemmodeling.model.ESMFAnnotation.GriddedComponent;
+import org.earthsystemmodeling.model.ui.ESMFElement.ESMFExecutionGroup;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.model.IContributedModelBuilder;
@@ -12,16 +16,20 @@ import org.eclipse.cdt.core.model.ITranslationUnit;
 import org.eclipse.cdt.internal.core.model.Parent;
 import org.eclipse.cdt.internal.core.model.TranslationUnit;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.photran.core.IFortranAST;
 import org.eclipse.photran.internal.core.FortranAST;
 import org.eclipse.photran.internal.core.lexer.IAccumulatingLexer;
 import org.eclipse.photran.internal.core.lexer.LexerFactory;
 import org.eclipse.photran.internal.core.lexer.SourceForm;
 import org.eclipse.photran.internal.core.lexer.preprocessor.fortran_include.IncludeLoaderCallback;
+import org.eclipse.photran.internal.core.model.IFortranModelBuilder;
 import org.eclipse.photran.internal.core.parser.ASTModuleNode;
 import org.eclipse.photran.internal.core.parser.Parser;
-
-import org.eclipse.photran.internal.core.model.IFortranModelBuilder;
 
 @SuppressWarnings("restriction")
 public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModelBuilder
@@ -47,7 +55,31 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
 
     public void parse(boolean quickParseMode) throws Exception
     {
-        //this.newElements = new HashMap<ICElement, Object /*CElementInfo*/>();
+       
+    	//PUT THIS HERE FOR NOW
+    	///////////////////////
+    	
+    	ESMFWorkspace workspace = ESMFFactory.eINSTANCE.createESMFWorkspace();
+    	FFramework framework = ESMFFactory.eINSTANCE.createFFramework();
+    	AnnotationBasedModelBuilder abmb = new AnnotationBasedModelBuilder(translationUnit, workspace, framework);
+    	abmb.parse();
+    	
+    	
+    	ResourceSet resourceSet = new ResourceSetImpl();
+    			resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(
+		    Resource.Factory.Registry.DEFAULT_EXTENSION, new XMIResourceFactoryImpl());	
+		Resource resource = resourceSet.createResource(URI.createURI("test.esmfx"));
+		resource.getContents().add(workspace);
+		resource.getContents().add(framework);
+		System.out.println("ESMF Workspace\n===========================\n");
+		resource.save(System.out, null);
+		System.out.println("\n===========================\n");
+    	
+    	    	
+    	///////////////////////
+    	
+    	
+    	//this.newElements = new HashMap<ICElement, Object /*CElementInfo*/>();
         boolean wasSuccessful = true;
 
         IAccumulatingLexer lexer = null;
@@ -178,7 +210,7 @@ public class ESMFModelBuilder implements IContributedModelBuilder, IFortranModel
     public boolean isESMFGriddedComponent(IFortranAST ast) {
     	ASTModuleNode node = ast.getRoot().findFirst(ASTModuleNode.class);
     	if (node != null) {
-    		if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.gridded_component)) {
+    		if (ESMFAnnotationUtil.hasESMFAnnotation(node, GriddedComponent.class)) {
     			return true;
     		}
     	}

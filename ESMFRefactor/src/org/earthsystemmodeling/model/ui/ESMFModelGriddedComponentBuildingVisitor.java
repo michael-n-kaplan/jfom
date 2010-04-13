@@ -1,8 +1,10 @@
-package org.earthsystemmodeling.model;
+package org.earthsystemmodeling.model.ui;
 
 import java.util.LinkedList;
 
-import org.earthsystemmodeling.model.ESMFElement.ESMFExecutionGroup;
+import org.earthsystemmodeling.model.ESMFAnnotation;
+import org.earthsystemmodeling.model.ESMFAnnotationUtil;
+import org.earthsystemmodeling.model.ui.ESMFElement.ESMFExecutionGroup;
 import org.eclipse.cdt.core.model.CModelException;
 import org.eclipse.cdt.internal.core.model.Parent;
 import org.eclipse.cdt.internal.core.model.TranslationUnit;
@@ -136,13 +138,13 @@ public final class ESMFModelGriddedComponentBuildingVisitor extends GenericASTVi
     
 
     
-    @Override
-    public void visitASTTypeDeclarationStmtNode(ASTTypeDeclarationStmtNode node) {
-    	if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.array)) {
-    		Token token = node.getEntityDeclList().get(0).getObjectName().getObjectName();
-    		addToModel(node, setPos(new ESMFElement.ESMFArray(getCurrentParent(), token), node));
-    	}    
-    }
+//    @Override
+//    public void visitASTTypeDeclarationStmtNode(ASTTypeDeclarationStmtNode node) {
+//    	if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.array)) {
+//    		Token token = node.getEntityDeclList().get(0).getObjectName().getObjectName();
+//    		addToModel(node, setPos(new ESMFElement.ESMFArray(getCurrentParent(), token), node));
+//    	}    
+//    }
 
 //    @Override
 //    public void visitASTModuleNode(ASTModuleNode node) {
@@ -164,22 +166,22 @@ public final class ESMFModelGriddedComponentBuildingVisitor extends GenericASTVi
 //        addToModel(node, setPos(new FortranElement.Function(getCurrentParent(), token), node));
 //    }
 
-    public void visitASTSubroutineSubprogramNode(ASTSubroutineSubprogramNode node) {
-        Token token = node.getSubroutineStmt().getSubroutineName().getSubroutineName();
-        
-        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.init)) {        	
-        	addToExecutionGroup(setPos(new ESMFElement.ESMFInitializeMethod(getCurrentParent(), token), node));
-        }
-        
-        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.run)) {
-        	addToExecutionGroup(setPos(new ESMFElement.ESMFRunMethod(getCurrentParent(), token), node));
-        }
-        
-        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.finalize)) {
-        	addToExecutionGroup(setPos(new ESMFElement.ESMFFinalizeMethod(getCurrentParent(), token), node));
-        }
-        
-    }
+//    public void visitASTSubroutineSubprogramNode(ASTSubroutineSubprogramNode node) {
+//        Token token = node.getSubroutineStmt().getSubroutineName().getSubroutineName();
+//        
+//        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.init)) {        	
+//        	addToExecutionGroup(setPos(new ESMFElement.ESMFInitializeMethod(getCurrentParent(), token), node));
+//        }
+//        
+//        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.run)) {
+//        	addToExecutionGroup(setPos(new ESMFElement.ESMFRunMethod(getCurrentParent(), token), node));
+//        }
+//        
+//        if (ESMFAnnotationUtil.hasESMFAnnotationOfType(node, ESMFAnnotation.Type.finalize)) {
+//        	addToExecutionGroup(setPos(new ESMFElement.ESMFFinalizeMethod(getCurrentParent(), token), node));
+//        }
+//        
+//    }
 
 //    public void visitASTSpecificBindingNode(ASTSpecificBindingNode node)
 //    {
