@@ -1,0 +1,3 @@
+JFOM is a Java API representation of the Fortran 90 syntactic structures.  The API can be used to create and manipulate an object representation of a Fortran 90 program.  The in-memory object tree can then be serialized into Fortran 90 code.  In other words, the API allows you to create an explicit object representation of a Fortran 90 abstract syntax tree.
+
+The project is currently in initial development phases.  I would estimate about 30% of the Fortran 90 syntax has actually been implemented.
